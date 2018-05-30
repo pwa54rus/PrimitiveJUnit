@@ -20,9 +20,9 @@ public class Runner{
 		}
 
 
-		if (countOfTreads > Runtime.getRuntime().availableProcessors() || countOfTreads == 0){
+		if ( countOfTreads <= 0){
 
-			System.out.println("You should choose number between 1 and " + Runtime.getRuntime().availableProcessors() + " to set count of threads");
+			System.out.println("You should choose number more than zero to set threads count");
 			return;
 		}
 
@@ -76,10 +76,28 @@ public class Runner{
 				Thread.sleep(500);
 			}
 
+
+
+
 			for(Thread thread : threads){
 
 				thread.interrupt();
 			}
+
+
+			int interruptedThreadsCounter = 0;
+
+			while(interruptedThreadsCounter != threads.length){
+
+				if (threads[interruptedThreadsCounter].isAlive())
+				{
+					Thread.sleep(500);
+					continue;
+				}
+
+				interruptedThreadsCounter++;
+			}
+
 		}
 		catch(Exception e){
 

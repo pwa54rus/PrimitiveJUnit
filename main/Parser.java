@@ -50,23 +50,37 @@ class Parser{
 			Method before = Parser.class.getDeclaredMethod("emptyMethod");
 			Method after = Parser.class.getDeclaredMethod("emptyMethod");
 
+			Object beforeDeclaringClass = this;
+			Object afterDeclaringClass = this;
+			Object methodDeclaringClass = this;
+
+
 			for (Method method : methods){
+
+				if (methodDeclaringClass == this){
+					methodDeclaringClass = method.getDeclaringClass().newInstance();
+				}
+
 
 				if (method.isAnnotationPresent(Before.class)){
 
-					before = method;
+						before = method;
+						beforeDeclaringClass = methodDeclaringClass;
 				}
 
 
 				if (method.isAnnotationPresent(After.class)) {
 
 					after = method;
+					afterDeclaringClass = methodDeclaringClass;
 				}
+
 			}
 
 			int i = 1;
 
 			for (Method method : methods){
+
 
 				String logMessage = "";
 
@@ -76,9 +90,9 @@ class Parser{
 
 					try{
 
-						before.invoke(before.getDeclaringClass().newInstance());
+						before.invoke(beforeDeclaringClass);
 
-						method.invoke(method.getDeclaringClass().newInstance());
+						method.invoke(methodDeclaringClass);
 
 						logMessage = "Test "+ i +" \"" + method.getName() + "\" passed\n";
 
@@ -88,9 +102,9 @@ class Parser{
 
 						try{
 
-							after.invoke(after.getDeclaringClass().newInstance());
+							after.invoke(afterDeclaringClass);
 						}
-						catch(IllegalArgumentException | InvocationTargetException | InstantiationException | IllegalAccessException  exception) {
+						catch(IllegalArgumentException | InvocationTargetException | IllegalAccessException  exception) {
 
 							System.out.println("After method is incorrect");
 						}
@@ -111,9 +125,9 @@ class Parser{
 
 							try{
 
-								after.invoke(after.getDeclaringClass().newInstance());
+								after.invoke(afterDeclaringClass);
 							}
-							catch(IllegalArgumentException | InvocationTargetException | InstantiationException | IllegalAccessException exception){
+							catch(IllegalArgumentException | InvocationTargetException | IllegalAccessException exception){
 
 								System.out.println("After method is incorrect");
 							}
@@ -128,7 +142,7 @@ class Parser{
 
 						testsFailed++;
 					}
-					catch (IllegalAccessException | IllegalArgumentException | InstantiationException e){
+					catch (IllegalAccessException | IllegalArgumentException e){
 
 						logMessage = "Test "+ i +" \"" + method.getName() + "\" failed: " + e.getMessage() +"\n\n";
 						testWriter.write(logMessage);
